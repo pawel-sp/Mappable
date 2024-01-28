@@ -172,6 +172,51 @@ final class MappableMacroTests: XCTestCase {
             """
             @Mappable(to: Bar.self)
             class Foo {
+                @Map("val")
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+            }
+            struct Bar {
+                let val: Int
+            }
+            """,
+            expandedSource:
+            """
+            class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+
+                convenience init(model: Bar) {
+                    self.init(
+                        value: model.val
+                    )
+                }
+
+                func model() -> Bar {
+                    .init(
+                        val: value
+                    )
+                }
+            }
+            struct Bar {
+                let val: Int
+            }
+            """,
+            macros: testMacros
+        )
+    }
+
+    func testMapMacroWithCustomPropertyNameAndClosures() throws {
+        assertMacroExpansion(
+            """
+            @Mappable(to: Bar.self)
+            class Foo {
                 let value1: Int
                 @Map("customValue2", from: { String($0) }, to: { Int($0) ?? 0 })
                 let value2: String
@@ -231,12 +276,12 @@ final class MappableMacroTests: XCTestCase {
             class Foo {
                 let value1: Int
                 @Map(
-                    from: { 
+                    from: {
                         let number = $0
                         let numberString = String(number)
                         return numberString
                     },
-                    to: { 
+                    to: {
                         let text = $0
                         let number = Int(text) ?? 0
                         return number

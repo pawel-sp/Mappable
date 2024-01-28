@@ -106,8 +106,8 @@ public struct MappableMacro: MemberMacro {
             colon: .colonToken(),
             expression: {
                 switch (customPropertyName, fromAttributeValue) {
-                case (_, .none):
-                    ExprSyntax(stringLiteral: "model.\(variableName)")
+                case let (customName, .none):
+                    ExprSyntax(stringLiteral: "model.\(customName ?? variableName)")
                 case let (customName, .some(labeledValue)) where labeledValue.hasPrefix("\\"):
                     ExprSyntax(stringLiteral: "model.\(customName ?? variableName)[keyPath: \(labeledValue)]")
                 case let (customName, .some(labeledValue)):
@@ -167,11 +167,9 @@ public struct MappableMacro: MemberMacro {
             colon: .colonToken(),
             expression: {
                 if let toAttributeValue {
-                    ExprSyntax(
-                        stringLiteral: toAttributeValue + "(\(variableName))"
-                    )
+                    ExprSyntax(stringLiteral: toAttributeValue + "(\(variableName))")
                 } else {
-                    ExprSyntax(stringLiteral: customPropertyName ?? variableName)
+                    ExprSyntax(stringLiteral: variableName)
                 }
             }()
         )
