@@ -7,6 +7,7 @@ final class MappableTests: XCTestCase {
             id: .init(value: 1),
             firstName: "John",
             lastName: "Doe",
+            bio: "Lorem ipsum",
             age: 35
         )
 
@@ -18,6 +19,7 @@ final class MappableTests: XCTestCase {
                 id: 1,
                 firstName: "John",
                 lastName: "DOE",
+                biography: "Lorem ipsum",
                 dateOfBirth: Date(age: 35)
             )
         )
@@ -28,6 +30,7 @@ final class MappableTests: XCTestCase {
             id: 1,
             firstName: "John",
             lastName: "DOE",
+            biography: "Lorem ipsum",
             dateOfBirth: Date(age: 35)
         )
 
@@ -39,6 +42,7 @@ final class MappableTests: XCTestCase {
                 id: .init(value: 1),
                 firstName: "John",
                 lastName: "Doe",
+                bio: "Lorem ipsum",
                 age: 35
             )
         )
@@ -55,6 +59,7 @@ private struct User {
     let id: Identifier
     let firstName: String
     let lastName: String
+    let bio: String
     let age: Int
 }
 
@@ -65,6 +70,8 @@ private class UserModel {
     private let firstName: String
     @Map(from: { (lastName: String) -> String in lastName.uppercased() }, to: { $0.lowercased().capitalized })
     private let lastName: String
+    @Map("bio")
+    private let biography: String
     @Map(
         "age",
         from: {
@@ -77,10 +84,11 @@ private class UserModel {
     )
     private let dateOfBirth: Date
 
-    init(id: Int, firstName: String, lastName: String, dateOfBirth: Date) {
+    init(id: Int, firstName: String, lastName: String, biography: String, dateOfBirth: Date) {
         self.id = id
         self.firstName = firstName
         self.lastName = lastName
+        self.biography = biography
         self.dateOfBirth = dateOfBirth
     }
 }
@@ -94,6 +102,7 @@ extension UserModel: Equatable {
         lhs.id == rhs.id &&
         lhs.firstName == rhs.firstName &&
         lhs.lastName == rhs.lastName &&
+        lhs.biography == rhs.biography &&
         lhs.dateOfBirth == rhs.dateOfBirth
     }
 }
