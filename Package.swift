@@ -31,6 +31,7 @@ let package = Package(
         .testTarget(
             name: "MappableTests",
             dependencies: [
+                "Mappable",
                 "MappableMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]

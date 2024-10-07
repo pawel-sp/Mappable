@@ -2,7 +2,7 @@ import SwiftSyntax
 import SwiftSyntaxBuilder
 import SwiftSyntaxMacros
 
-public struct MappableMacro: MemberMacro {
+public struct MappableMacro {
     enum Error: Swift.Error, CustomStringConvertible {
         case onlyApplicableToStructOrClass
         case missingTypeDefined
@@ -19,7 +19,9 @@ public struct MappableMacro: MemberMacro {
             }
         }
     }
+}
 
+extension MappableMacro: MemberMacro {
     public static func expansion(
         of node: SwiftSyntax.AttributeSyntax,
         providingMembersOf declaration: some SwiftSyntax.DeclGroupSyntax,
@@ -47,6 +49,7 @@ public struct MappableMacro: MemberMacro {
             .init(
                 initFromModelDecl(
                     accessModifiers: accessModifiers,
+                    isRequired: !declaration.containsModifier(.final),
                     mappableType: mappableType,
                     variablesDecl: variablesDecl
                 )
@@ -65,11 +68,14 @@ public struct MappableMacro: MemberMacro {
 
     private static func initFromModelDecl(
         accessModifiers: DeclModifierListSyntax,
+        isRequired: Bool,
         mappableType: String,
         variablesDecl: [VariableDeclSyntax]
     ) throws -> InitializerDeclSyntax {
         try .init(
-            modifiers: accessModifiers + [DeclModifierSyntax(name: TokenSyntax.keyword(.convenience))],
+            modifiers: accessModifiers +
+                (isRequired ? [DeclModifierSyntax(name: TokenSyntax.keyword(.required))] : []) +
+                [DeclModifierSyntax(name: TokenSyntax.keyword(.convenience))],
             signature: FunctionSignatureSyntax(
                 parameterClause: FunctionParameterClauseSyntax(
                     parameters: FunctionParameterListSyntax {
@@ -187,5 +193,28 @@ public struct MappableMacro: MemberMacro {
                 }
             }()
         )
+    }
+}
+
+extension MappableMacro: ExtensionMacro {
+    public static func expansion(
+        of node: SwiftSyntax.AttributeSyntax,
+        attachedTo declaration: some SwiftSyntax.DeclGroupSyntax,
+        providingExtensionsOf type: some SwiftSyntax.TypeSyntaxProtocol,
+        conformingTo protocols: [SwiftSyntax.TypeSyntax],
+        in context: some SwiftSyntaxMacros.MacroExpansionContext
+    ) throws -> [SwiftSyntax.ExtensionDeclSyntax] {
+        guard
+            (declaration.is(StructDeclSyntax.self) || declaration.is(ClassDeclSyntax.self)),
+            let extendedType = declaration.typeName()
+        else {
+            throw Error.onlyApplicableToStructOrClass
+        }
+        let extensionDecl = ExtensionDeclSyntax(
+            extendedType: TypeSyntax(stringLiteral: extendedType),
+            inheritanceClause: .init(inheritedTypes: .init(arrayLiteral: .init(type: TypeSyntax("Mappable")))),
+            memberBlockBuilder: {}
+        )
+        return [extensionDecl]
     }
 }
