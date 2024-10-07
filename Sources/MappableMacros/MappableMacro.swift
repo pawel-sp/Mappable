@@ -39,25 +39,37 @@ public struct MappableMacro: MemberMacro {
         else {
             throw Error.missingTypeDefined
         }
+        let accessModifiers = declaration.accessModifiers(skip: TokenSyntax.keyword(.private))
         let mappableType = typeExpression.description
         let variablesDecl = declaration.memberBlock.members.compactMap { $0.decl.as(VariableDeclSyntax.self) }
 
         return try [
-            .init(initFromModelDecl(mappableType: mappableType, variablesDecl: variablesDecl)),
-            .init(makeModelFuncDecl(mappableType: mappableType, variablesDecl: variablesDecl)),
+            .init(
+                initFromModelDecl(
+                    accessModifiers: accessModifiers,
+                    mappableType: mappableType,
+                    variablesDecl: variablesDecl
+                )
+            ),
+            .init(
+                makeModelFuncDecl(
+                    accessModifiers: accessModifiers,
+                    mappableType: mappableType,
+                    variablesDecl: variablesDecl
+                )
+            ),
         ]
     }
 
     // MARK: Init from model
 
     private static func initFromModelDecl(
+        accessModifiers: DeclModifierListSyntax,
         mappableType: String,
         variablesDecl: [VariableDeclSyntax]
     ) throws -> InitializerDeclSyntax {
         try .init(
-            modifiers: DeclModifierListSyntax(
-                arrayLiteral: DeclModifierSyntax(name: TokenSyntax.keyword(.convenience))
-            ),
+            modifiers: accessModifiers + [DeclModifierSyntax(name: TokenSyntax.keyword(.convenience))],
             signature: FunctionSignatureSyntax(
                 parameterClause: FunctionParameterClauseSyntax(
                     parameters: FunctionParameterListSyntax {
@@ -120,10 +132,12 @@ public struct MappableMacro: MemberMacro {
     // MARK: To model
 
     private static func makeModelFuncDecl(
+        accessModifiers: DeclModifierListSyntax,
         mappableType: String,
         variablesDecl: [VariableDeclSyntax]
     ) throws -> FunctionDeclSyntax {
         try .init(
+            modifiers: accessModifiers,
             name: TokenSyntax(stringLiteral: "model"),
             signature: FunctionSignatureSyntax(
                 parameterClause: FunctionParameterClauseSyntax(parameters: FunctionParameterListSyntax()),

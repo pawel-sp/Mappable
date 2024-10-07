@@ -52,6 +52,94 @@ final class MappableMacroTests: XCTestCase {
             macros: testMacros
         )
     }
+    
+    func testDefaultMacroWithPublicAccessControl() throws {
+        assertMacroExpansion(
+            """
+            @Mappable(to: Bar.self)
+            public final class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            expandedSource:
+            """
+            public final class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+
+                public convenience init(model: Bar) {
+                    self.init(
+                        value: model.value
+                    )
+                }
+
+                public func model() -> Bar {
+                    .init(
+                        value: value
+                    )
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            macros: testMacros
+        )
+    }
+    
+    func testDefaultMacroWithPrivateAccessControl() throws {
+        assertMacroExpansion(
+            """
+            @Mappable(to: Bar.self)
+            private final class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            expandedSource:
+            """
+            private final class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+
+                convenience init(model: Bar) {
+                    self.init(
+                        value: model.value
+                    )
+                }
+
+                func model() -> Bar {
+                    .init(
+                        value: value
+                    )
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            macros: testMacros
+        )
+    }
 
     func testMapMacroWithFromClosure() throws {
         assertMacroExpansion(
