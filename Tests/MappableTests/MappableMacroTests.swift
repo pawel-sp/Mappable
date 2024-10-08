@@ -33,6 +33,53 @@ final class MappableMacroTests: XCTestCase {
                     self.value = value
                 }
 
+                required convenience init(model: Bar) {
+                    self.init(
+                        value: model.value
+                    )
+                }
+
+                func model() -> Bar {
+                    .init(
+                        value: value
+                    )
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            
+            extension Foo: Mappable {
+            }
+            """,
+            macros: testMacros
+        )
+    }
+    
+    func testDefaultMacroWithFinal() throws {
+        assertMacroExpansion(
+            """
+            @Mappable(to: Bar.self)
+            final class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            expandedSource:
+            """
+            final class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+
                 convenience init(model: Bar) {
                     self.init(
                         value: model.value
@@ -47,6 +94,103 @@ final class MappableMacroTests: XCTestCase {
             }
             struct Bar {
                 let value: Int
+            }
+            
+            extension Foo: Mappable {
+            }
+            """,
+            macros: testMacros
+        )
+    }
+    
+    func testDefaultMacroWithPublicAccessControl() throws {
+        assertMacroExpansion(
+            """
+            @Mappable(to: Bar.self)
+            public class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            expandedSource:
+            """
+            public class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+
+                public required convenience init(model: Bar) {
+                    self.init(
+                        value: model.value
+                    )
+                }
+
+                public func model() -> Bar {
+                    .init(
+                        value: value
+                    )
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            
+            extension Foo: Mappable {
+            }
+            """,
+            macros: testMacros
+        )
+    }
+    
+    func testDefaultMacroWithPrivateAccessControl() throws {
+        assertMacroExpansion(
+            """
+            @Mappable(to: Bar.self)
+            private class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            """,
+            expandedSource:
+            """
+            private class Foo {
+                let value: Int
+
+                init(value: Int) {
+                    self.value = value
+                }
+
+                required convenience init(model: Bar) {
+                    self.init(
+                        value: model.value
+                    )
+                }
+
+                func model() -> Bar {
+                    .init(
+                        value: value
+                    )
+                }
+            }
+            struct Bar {
+                let value: Int
+            }
+            
+            extension Foo: Mappable {
             }
             """,
             macros: testMacros
@@ -83,7 +227,7 @@ final class MappableMacroTests: XCTestCase {
                     self.value2 = value2
                 }
 
-                convenience init(model: Bar) {
+                required convenience init(model: Bar) {
                     self.init(
                         value1: model.value1,
                         value2: {
@@ -104,6 +248,9 @@ final class MappableMacroTests: XCTestCase {
             struct Bar {
                 let value1: Int
                 let value2: Int
+            }
+            
+            extension Foo: Mappable {
             }
             """,
             macros: testMacros
@@ -142,7 +289,7 @@ final class MappableMacroTests: XCTestCase {
                     self.value2 = value2
                 }
 
-                convenience init(model: Bar) {
+                required convenience init(model: Bar) {
                     self.init(
                         value1: model.value1,
                         value2: model.value2[keyPath: \\.value]
@@ -161,6 +308,9 @@ final class MappableMacroTests: XCTestCase {
             }
             struct Baz {
                 let value: Int
+            }
+            
+            extension Foo: Mappable {
             }
             """,
             macros: testMacros
@@ -192,7 +342,7 @@ final class MappableMacroTests: XCTestCase {
                     self.value = value
                 }
 
-                convenience init(model: Bar) {
+                required convenience init(model: Bar) {
                     self.init(
                         value: model.val
                     )
@@ -206,6 +356,9 @@ final class MappableMacroTests: XCTestCase {
             }
             struct Bar {
                 let val: Int
+            }
+            
+            extension Foo: Mappable {
             }
             """,
             macros: testMacros
@@ -242,7 +395,7 @@ final class MappableMacroTests: XCTestCase {
                     self.value2 = value2
                 }
 
-                convenience init(model: Bar) {
+                required convenience init(model: Bar) {
                     self.init(
                         value1: model.value1,
                         value2: {
@@ -263,6 +416,9 @@ final class MappableMacroTests: XCTestCase {
             struct Bar {
                 let value1: Int
                 let customValue2: Int
+            }
+            
+            extension Foo: Mappable {
             }
             """,
             macros: testMacros
@@ -310,7 +466,7 @@ final class MappableMacroTests: XCTestCase {
                     self.value2 = value2
                 }
 
-                convenience init(model: Bar) {
+                required convenience init(model: Bar) {
                     self.init(
                         value1: model.value1,
                         value2: {
@@ -335,6 +491,9 @@ final class MappableMacroTests: XCTestCase {
             struct Bar {
                 let value1: Int
                 let value2: Int
+            }
+            
+            extension Foo: Mappable {
             }
             """,
             macros: testMacros
