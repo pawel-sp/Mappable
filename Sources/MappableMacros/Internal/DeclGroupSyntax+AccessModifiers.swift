@@ -3,19 +3,19 @@ import SwiftSyntax
 extension DeclGroupSyntax {
     func accessModifiers(skip tokens: TokenSyntax...) -> DeclModifierListSyntax {
         modifiers.filter {
-            guard let keyword = $0.name.as(TokenSyntax.self) else { return false }
-            guard !tokens.contains(where: { $0.text == keyword.text }) else { return false }
+            let keywordText = $0.name.text
+            guard !tokens.contains(where: { $0.text == keywordText }) else { return false }
             return
-                keyword.text == TokenSyntax.keyword(.public).text ||
-                keyword.text == TokenSyntax.keyword(.internal).text ||
-                keyword.text == TokenSyntax.keyword(.private).text ||
-                keyword.text == TokenSyntax.keyword(.fileprivate).text
+                keywordText == TokenSyntax.keyword(.public).text ||
+                keywordText == TokenSyntax.keyword(.internal).text ||
+                keywordText == TokenSyntax.keyword(.private).text ||
+                keywordText == TokenSyntax.keyword(.fileprivate).text
         }
     }
     
     func containsModifier(_ modifier: Keyword) -> Bool {
         self.modifiers.contains {
-            $0.name.as(TokenSyntax.self)?.text == TokenSyntax.keyword(.final).text
+            $0.name.text == TokenSyntax.keyword(.final).text
         }
     }
     
