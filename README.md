@@ -55,7 +55,7 @@ let user = User(id: 1, firstName: "John", lastName: "Doe")
 let userObject = UserObject(user: user)
 
 // UserObject ➡️ User
-let userObject = UserObject(id: 1, firstName: "John", lastName: "Doe)
+let userObject = UserObject(id: 1, firstName: "John", lastName: "Doe")
 let user = User(userObject: userObject)
 ```
 Writing such code manually is a very repetitive task. `Mappable` macro solves this issue by generating `convenience init()` and `model()` functions to a class or struct, which allows mapping it to the associated type.
